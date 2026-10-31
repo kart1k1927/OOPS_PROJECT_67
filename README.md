@@ -23,7 +23,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-We're trying to simulate yo
+OOPS PROJECT
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -93,12 +93,9 @@ After createing a seperate and new branch, push updates to here
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
-
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
+- Must Create endpoints
+- Must create the webpages
+- Authentication
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
