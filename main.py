@@ -1,8 +1,12 @@
 from fastapi import FastAPI
-from database import supabase
+from app.database.database import supabase
+from app.api.routers import auth
 
 # Initialize the FastAPI app
 app = FastAPI(title="IT Service Management API")
+
+# Include the auth router
+app.include_router(auth.router)
 
 
 @app.get("/")

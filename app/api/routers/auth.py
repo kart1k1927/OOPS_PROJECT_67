@@ -3,7 +3,7 @@ from fastapi import APIRouter
 #ADD your own endpoints here, this is just a template for auth endpoints
 
 #v1 as prefix, for scalability, but it doesnt lowkey matter
-router = APIRouter(prefix="/api/v1", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 #for logging
 @router.post("/login")
