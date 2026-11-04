@@ -1,0 +1,63 @@
+<html>
+<head>
+    <title>welcome</title>
+
+    <!-- css -->
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <!-- bootstrap -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+    
+</head>
+<body>
+    <h1>report</h1>
+
+    <h3>incident id: {{ id }}</h3>
+    <br>
+    <h3>reported by {{ reporter }}</h3>
+    <br><br>
+
+    <p>incident category: {{ type }} </p>
+    <br>
+
+    <p>incident description: {{ description }} </p>
+    <br>
+
+    <p>affected service: {{ service }} </p>
+    <br>
+
+    <p>priority: {{ priority }} </p>
+    <br>
+
+    <p>urgency: {{ urgency }} </p>
+    <br>
+
+    <p>creation time: {{ submissionTime }} </p>
+    <br>
+
+    <p>current status: {{ status }}</p>
+    <br>
+
+    <p>assigned technician: {{ techName }}</p>
+    <br>
+
+    <!-- idk wtf this sla is -->
+    <p>sla: {{ sla }} </p>
+    <br>
+
+    <p>investigation details: {{ investigation }} </p>
+    <br>
+
+    <p>resolution: {{ resolution }} </p>
+    <br>
+
+    <p>closure information: {{ closureInfo }} </p>
+    <br><br>
+
+    <p>thank you!</p>
+    <a href="clienthome.html">home</a>
+
+
+</body>
+</html>
