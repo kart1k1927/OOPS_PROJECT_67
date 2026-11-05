@@ -52,6 +52,10 @@ To get a local copy up and running follow these simple example steps.
    ```sh
    git remote -v # confirm the changes
    ```
+4. Create a virtual env (venv) and reload bash thorugh source cmd or jstu run this below cmd after switch branches
+   ```** pwsh**
+   python3 -m venv .venv && source .venv\Scripts\activate && pip install -r requirements.txt
+   ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
