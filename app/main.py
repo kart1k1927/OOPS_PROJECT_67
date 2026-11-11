@@ -20,7 +20,7 @@ app.include_router(admin.router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the IT Service Management Backend!"}
+    return {"message": "Wesdfsdfseflcome to the IT Service Management Backend!"}
 
 
 @app.get("/health")
