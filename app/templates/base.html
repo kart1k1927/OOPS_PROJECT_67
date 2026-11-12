@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}I-ITSM{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', path='css/tokens.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/components.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/layout.css') }}">
+</head>
+<body>
+<div class="shell">
+  <nav class="rail">
+    <div class="rail__brand">
+      <a href="{{ user.home_route() }}">I-ITSM</a>
+      <span>BITS Hyderabad</span>
+    </div>
+
+    {% set path = request.url.path %}
+    {% if user.role.value == 'EMPLOYEE' %}
+    <div class="rail__group">
+      <div class="rail__grouplabel">My incidents</div>
+      <a class="rail__link {% if path == '/my-incidents' %}rail__link--on{% endif %}" href="/my-incidents">All reports</a>
+      <a class="rail__link {% if path == '/report' %}rail__link--on{% endif %}" href="/report">Report an incident</a>
+    </div>
+    {% elif user.role.value == 'TECHNICIAN' %}
+    <div class="rail__group">
+      <div class="rail__grouplabel">Work</div>
+      <a class="rail__link {% if path == '/queue' %}rail__link--on{% endif %}" href="/queue">
+        Queue <span class="rail__count">{{ user.active_workload }}/{{ user.max_workload }}</span>
+      </a>
+      <a class="rail__link" href="/queue?tab=unassigned">Unassigned</a>
+      <a class="rail__link" href="/queue?tab=all">Everything</a>
+    </div>
+    {% else %}
+    <div class="rail__group">
+      <div class="rail__grouplabel">Operations</div>
+      <a class="rail__link {% if path == '/operations' %}rail__link--on{% endif %}" href="/operations">Overview</a>
+      <a class="rail__link {% if path == '/admin/incidents' %}rail__link--on{% endif %}" href="/admin/incidents">All incidents</a>
+      <a class="rail__link {% if path == '/admin/audit' %}rail__link--on{% endif %}" href="/admin/audit">Audit log</a>
+    </div>
+    <div class="rail__group">
+      <div class="rail__grouplabel">Configure</div>
+      <a class="rail__link {% if path == '/admin/people' %}rail__link--on{% endif %}" href="/admin/people">People</a>
+      <a class="rail__link {% if path == '/admin/catalog' %}rail__link--on{% endif %}" href="/admin/catalog">Services and SLA</a>
+      <a class="rail__link {% if path == '/admin/settings' %}rail__link--on{% endif %}" href="/admin/settings">System settings</a>
+    </div>
+    {% endif %}
+
+    <div class="rail__foot">
+      <div class="rail__who">
+        <span class="rail__initials">{{ user.initials }}</span>
+        <span>
+          <span class="rail__name">{{ user.full_name }}</span><br>
+          <span class="rail__role">{{ user.employee_code }} · {{ user.role.label }}</span>
+        </span>
+      </div>
+      <a class="rail__signout" href="/signout">Sign out</a>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="crumbs">{% block crumbs %}{% endblock %}</div>
+      <div class="topbar__right">
+        <a class="bell" href="/notifications">
+          Notifications{% if unread %}<span class="bell__count">{{ unread }}</span>{% endif %}
+        </a>
+      </div>
+    </header>
+
+    <main class="content {% block content_class %}{% endblock %}">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

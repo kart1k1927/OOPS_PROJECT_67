@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% block title %}Queue · I-ITSM{% endblock %}
+{% block crumbs %}<b>Queue</b>{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">Incident queue</h1>
+    <p class="t-body">Sorted by priority, then by how close the SLA deadline is.</p>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="stats">
+    {% for label, value in stats %}
+    <div class="stat">
+      <span class="stat__label t-colhead">{{ label }}</span>
+      <span class="t-metric">{{ value }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="panel">
+  <nav class="tabs">
+    <a class="tab {% if tab == 'mine' %}tab--on{% endif %}" href="/queue?tab=mine">Assigned to me</a>
+    <a class="tab {% if tab == 'unassigned' %}tab--on{% endif %}" href="/queue?tab=unassigned">Unassigned</a>
+    <a class="tab {% if tab == 'all' %}tab--on{% endif %}" href="/queue?tab=all">Everything</a>
+  </nav>
+  {{ ui.filter_bar(query, all_statuses, all_priorities, categories, services, '/queue') }}
+  <div class="panel__body panel__body--flush">
+    {{ ui.incident_table(
+         incidents,
+         ['priority', 'service', 'reporter', 'status', 'sla', 'updated'],
+         'Nothing in this view. Either the queue is clear or the filters are too narrow.',
+         '/queue', 'Clear filters') }}
+  </div>
+</div>
+{% endblock %}

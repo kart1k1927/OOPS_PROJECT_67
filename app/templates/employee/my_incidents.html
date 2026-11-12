@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% block title %}My incidents · I-ITSM{% endblock %}
+{% block crumbs %}<b>My incidents</b>{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">My incidents</h1>
+    <p class="t-body">Everything you have reported, and where it has got to.</p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="btn btn--primary" href="/report">Report an incident</a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="stats">
+    {% for label, value in stats %}
+    <div class="stat">
+      <span class="stat__label t-colhead">{{ label }}</span>
+      <span class="t-metric">{{ value }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="panel">
+  {{ ui.filter_bar(query, all_statuses, all_priorities, categories, services, '/my-incidents') }}
+  <div class="panel__body panel__body--flush">
+    {{ ui.incident_table(
+         incidents,
+         ['priority', 'service', 'status', 'sla', 'updated'],
+         'You have not reported any incidents.',
+         '/report', 'Report an incident') }}
+  </div>
+</div>
+{% endblock %}

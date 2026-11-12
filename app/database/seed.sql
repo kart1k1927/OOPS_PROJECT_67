@@ -59,10 +59,10 @@ SET
 INSERT INTO public.sla_policies
     (priority, response_hours, resolution_hours, escalation_hours)
 VALUES
-    ('P1', 0.0833, 0.50, 0.25),
-    ('P2', 0.25,   2.00, 1.00),
-    ('P3', 1.00,   8.00, 4.00),
-    ('P4', 4.00,  24.00, 8.00)
+    ('P1', 0.0833, 0.50, 0.25),  -- 5m / 30m / 15m
+    ('P2', 0.25,   2.00, 1.00),  -- 15m / 2h / 1h
+    ('P3', 1.00,   8.00, 4.00),  -- 1h / 8h / 4h
+    ('P4', 4.00,  24.00, 8.00)   -- 4h / 24h / 8h
 ON CONFLICT (priority) DO UPDATE
 SET
     response_hours = EXCLUDED.response_hours,

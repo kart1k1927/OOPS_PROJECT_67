@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}System settings · I-ITSM{% endblock %}
+{% block crumbs %}<a href="/operations">Operations</a> <span>/</span> <b>System settings</b>{% endblock %}
+{% block content_class %}content--read{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">System settings</h1>
+    <p class="t-body">Changes take effect on the next incident. No restart, no deploy.</p>
+  </div>
+</div>
+
+{# The Strategy pattern, made clickable. This is the screen to demonstrate. #}
+<div class="panel">
+  <div class="panel__head">
+    <h2 class="t-section">Technician assignment strategy</h2>
+    <span class="badge badge--open">{{ settings.assignment_strategy.label }}</span>
+  </div>
+  <div class="panel__body">
+    <form method="post" action="/admin/settings/assignment">
+      <div class="stack">
+        {% for strategy in assignment_strategies %}
+        <label class="row-flex" style="align-items: flex-start; gap: var(--s-3);">
+          <input type="radio" name="strategy" value="{{ strategy.name }}"
+                 {% if strategy.name == settings.assignment_strategy_name %}checked{% endif %}
+                 style="margin-top: 3px;">
+          <span>
+            <span class="t-strong">{{ strategy.label }}</span>
+            <span class="t-caption muted" style="display:block">{{ strategy.description }}</span>
+          </span>
+        </label>
+        {% endfor %}
+      </div>
+      <button class="btn btn--primary mt-4" type="submit">Use this strategy</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel__head">
+    <h2 class="t-section">Priority algorithm</h2>
+    <span class="badge badge--open">{{ settings.priority_strategy_name }}</span>
+  </div>
+  <div class="panel__body">
+    <form method="post" action="/admin/settings/priority">
+      <div class="stack">
+        {% for strategy in priority_strategies %}
+        <label class="row-flex" style="align-items: flex-start; gap: var(--s-3);">
+          <input type="radio" name="strategy" value="{{ strategy.name }}"
+                 {% if strategy.name == settings.priority_strategy_name %}checked{% endif %}
+                 style="margin-top: 3px;">
+          <span>
+            <span class="t-strong">{{ strategy.label }}</span>
+            <span class="t-caption muted" style="display:block">{{ strategy.description }}</span>
+          </span>
+        </label>
+        {% endfor %}
+      </div>
+      <button class="btn btn--primary mt-4" type="submit">Use this algorithm</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel__head"><h2 class="t-section">Automated features</h2></div>
+  <div class="panel__body panel__body--flush">
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Feature</th><th style="width:92px">State</th><th style="width:112px"></th></tr></thead>
+        <tbody>
+          {% for key, label, description in [
+              ('auto_assign', 'Automatic assignment', 'Assign a technician the moment an incident is reported.'),
+              ('duplicate_detection', 'Duplicate detection', 'Compare each new report against recent ones on the same service.'),
+              ('auto_categorize', 'Automatic categorization', 'Suggest a category from the description when none is chosen.')
+          ] %}
+          {% set on = settings.as_dict()[key] %}
+          <tr>
+            <td>
+              <div class="t-strong">{{ label }}</div>
+              <div class="t-caption dim">{{ description }}</div>
+            </td>
+            <td><span class="badge badge--{{ 'ok' if on else 'none' }}">{{ 'On' if on else 'Off' }}</span></td>
+            <td>
+              <form method="post" action="/admin/settings/toggle">
+                <input type="hidden" name="key" value="{{ key }}">
+                <input type="hidden" name="value" value="{{ '0' if on else '1' }}">
+                <button class="btn btn--ghost" type="submit">Turn {{ 'off' if on else 'on' }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel__head">
+    <h2 class="t-section">Notification channels</h2>
+    <span class="t-caption dim">routed by priority</span>
+  </div>
+  <div class="panel__body">
+    <dl class="facts">
+      {% for channel in channels %}
+      <dt>{{ channel.name }}</dt><dd>{{ channel.label }}</dd>
+      {% endfor %}
+    </dl>
+    <p class="t-caption muted mt-4">
+      P1 and any SLA breach reach every channel. P2 reaches in-app and email. P3 and P4 reach in-app only,
+      because nobody should be texted about a P4.
+    </p>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel__head">
+    <h2 class="t-section">Incident lifecycle</h2>
+    <span class="t-caption dim">enforced by the state machine</span>
+  </div>
+  <div class="panel__body panel__body--flush">
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th style="width:160px">State</th><th>May move to</th></tr></thead>
+        <tbody>
+          {% for state, targets in graph.items() %}
+          <tr>
+            <td><span class="t-meta">{{ state }}</span></td>
+            <td>
+              {% if targets %}<span class="t-meta dim">{{ targets | join(' · ') }}</span>
+              {% else %}<span class="t-caption dim">nothing, this state is final</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

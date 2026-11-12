@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% block title %}All incidents · I-ITSM{% endblock %}
+{% block crumbs %}<a href="/operations">Operations</a> <span>/</span> <b>All incidents</b>{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">All incidents</h1>
+    <p class="t-body">{{ total }} matching. Nine filter criteria, and they combine.</p>
+  </div>
+</div>
+
+<div class="panel">
+  {{ ui.filter_bar(query, all_statuses, all_priorities, categories, services, '/admin/incidents') }}
+  <div class="panel__body panel__body--flush">
+    {{ ui.incident_table(
+         incidents,
+         ['priority', 'service', 'reporter', 'technician', 'status', 'sla'],
+         'No incident matches those filters.',
+         '/admin/incidents', 'Clear filters') }}
+  </div>
+</div>
+{% endblock %}
