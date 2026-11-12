@@ -340,6 +340,9 @@ screens target 1024 and up and are usable but not optimised below that.
 Every member must understand the whole system. The evaluator can ask anyone about any module and the
 group receives a single shared score.
 
+The original work split, the 11 day schedule and the Definition of Done checklist mapped to the 120
+mark rubric are in [`docs/team-plan.md`](docs/team-plan.md).
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---

@@ -8,3 +8,6 @@ __pycache__/
 venv/
 # Simulated email and SMS output from the notification channels
 logs/
+
+# Local editor and agent tooling, not part of the project
+.claude/
