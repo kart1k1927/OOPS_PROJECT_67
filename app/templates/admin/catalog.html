@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Services and SLA · I-ITSM{% endblock %}
+{% block crumbs %}<a href="/operations">Operations</a> <span>/</span> <b>Services and SLA</b>{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">Services and SLA</h1>
+    <p class="t-body">Business criticality feeds the priority calculation. SLA targets feed every deadline.</p>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel__head"><h2 class="t-section">SLA policies</h2><span class="t-caption dim">hours</span></div>
+  <div class="panel__body panel__body--flush">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th style="width:120px">Priority</th><th style="width:140px">Response</th><th style="width:140px">Resolution</th><th style="width:140px">Escalation</th><th>Reads as</th><th style="width:88px"></th></tr>
+        </thead>
+        <tbody>
+          {% for policy in policies %}
+          <tr>
+            <form method="post" action="/admin/catalog/sla" id="sla-{{ policy.priority.value }}"></form>
+            <td><span class="badge badge--{{ policy.priority.value | lower }}">{{ policy.priority.value }} {{ policy.priority.label }}</span>
+              <input type="hidden" form="sla-{{ policy.priority.value }}" name="priority" value="{{ policy.priority.value }}"></td>
+            <td><input class="input" form="sla-{{ policy.priority.value }}" type="number" step="0.0001" min="0.0001" name="response_hours" value="{{ policy.response_hours }}" style="height:28px"></td>
+            <td><input class="input" form="sla-{{ policy.priority.value }}" type="number" step="0.01" min="0.01" name="resolution_hours" value="{{ policy.resolution_hours }}" style="height:28px"></td>
+            <td><input class="input" form="sla-{{ policy.priority.value }}" type="number" step="0.01" min="0.01" name="escalation_hours" value="{{ policy.escalation_hours }}" style="height:28px"></td>
+            <td class="t-small dim">{{ policy.describe() }}</td>
+            <td><button class="btn btn--ghost" form="sla-{{ policy.priority.value }}" type="submit">Save</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel__head"><h2 class="t-section">IT services</h2></div>
+    <div class="panel__body panel__body--flush">
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Service</th><th style="width:96px" class="num">Criticality</th><th style="width:80px">State</th><th style="width:112px"></th></tr></thead>
+          <tbody>
+            {% for service in services %}
+            <tr>
+              <td>
+                <div class="t-strong">{{ service.name }}</div>
+                {% if service.description %}<div class="t-caption dim">{{ service.description }}</div>{% endif %}
+              </td>
+              <td class="num">{{ service.business_criticality }}</td>
+              <td><span class="badge badge--{{ 'ok' if service.is_active else 'none' }}">{{ 'Active' if service.is_active else 'Retired' }}</span></td>
+              <td>
+                <form method="post" action="/admin/catalog/service/{{ service.id }}/active">
+                  <input type="hidden" name="active" value="{{ '0' if service.is_active else '1' }}">
+                  <button class="btn btn--ghost" type="submit">{{ 'Retire' if service.is_active else 'Restore' }}</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel__body">
+      <form method="post" action="/admin/catalog/service">
+        <h3 class="t-section mb-2">Add a service</h3>
+        <label class="field">
+          <span class="field__label">Name</span>
+          <input class="input" type="text" name="name" required placeholder="Library Management System">
+        </label>
+        <label class="field">
+          <span class="field__label">Business criticality</span>
+          <select class="select" name="business_criticality">
+            {% for n in [5, 4, 3, 2, 1] %}<option value="{{ n }}" {% if n == 3 %}selected{% endif %}>{{ n }} of 5</option>{% endfor %}
+          </select>
+          <span class="field__hint">5 multiplies priority hardest.</span>
+        </label>
+        <button class="btn btn--secondary" type="submit">Add service</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__head"><h2 class="t-section">Categories</h2><span class="t-meta dim">{{ categories | length }}</span></div>
+    <div class="panel__body panel__body--flush">
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Category</th><th>Description</th></tr></thead>
+          <tbody>
+            {% for category in categories %}
+            <tr>
+              <td class="t-strong nowrap">{{ category.name }}</td>
+              <td class="t-small dim">{{ category.description or '' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel__body">
+      <form method="post" action="/admin/catalog/category">
+        <h3 class="t-section mb-2">Add a category</h3>
+        <label class="field">
+          <span class="field__label">Name</span>
+          <input class="input" type="text" name="name" required placeholder="Printing">
+        </label>
+        <label class="field">
+          <span class="field__label">Description</span>
+          <input class="input" type="text" name="description" placeholder="Campus printing and reprographics">
+        </label>
+        <button class="btn btn--secondary" type="submit">Add category</button>
+        <p class="field__hint mt-4">
+          A new category needs no code change. The categorizer falls back to keyword scoring over whatever
+          categories exist, and the skill based assignment strategy reads skills against them.
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

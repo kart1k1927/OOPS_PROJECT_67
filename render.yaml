@@ -1,0 +1,31 @@
+# Render blueprint. Deploy with: Render dashboard > New > Blueprint > pick this repo.
+#
+# A web service, not a serverless function, because the SLA monitor in
+# app/main.py is a background task that has to survive between requests, and
+# SystemSettings keeps the active strategy in process.
+#
+# One worker on purpose. Each worker would run its own SLA sweep, so two
+# workers means two notifications for every breach.
+
+services:
+  - type: web
+    name: iitsm
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+      - key: SUPABASE_URL
+        sync: false          # set in the dashboard, never committed
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true  # Render generates and stores this one
+      - key: SESSION_HOURS
+        value: "12"

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}People · I-ITSM{% endblock %}
+{% block crumbs %}<a href="/operations">Operations</a> <span>/</span> <b>People</b>{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">People</h1>
+    <p class="t-body">Accounts, roles and technician skills.</p>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel__head"><h2 class="t-section">All accounts</h2><span class="t-meta dim">{{ people | length }}</span></div>
+  <div class="panel__body panel__body--flush">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:96px">Code</th><th>Name</th><th style="width:220px">Email</th>
+            <th style="width:148px">Role</th><th style="width:88px">State</th><th style="width:132px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for person in people %}
+          <tr>
+            <td class="nowrap"><span class="t-id">{{ person.employee_code }}</span></td>
+            <td class="t-strong">{{ person.full_name }}</td>
+            <td class="t-small dim">{{ person.email }}</td>
+            <td>
+              <form method="post" action="/admin/people/{{ person.id }}/role" class="row-flex">
+                <select class="select" name="role" style="height:28px">
+                  {% for role in roles %}
+                  <option value="{{ role.value }}" {% if role == person.role %}selected{% endif %}>{{ role.label }}</option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn--ghost" type="submit">Set</button>
+              </form>
+            </td>
+            <td><span class="badge badge--{{ 'ok' if person.is_active else 'none' }}">{{ 'Active' if person.is_active else 'Inactive' }}</span></td>
+            <td>
+              <form method="post" action="/admin/people/{{ person.id }}/active">
+                <input type="hidden" name="active" value="{{ '0' if person.is_active else '1' }}">
+                <button class="btn btn--ghost" type="submit">{{ 'Deactivate' if person.is_active else 'Activate' }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel__head"><h2 class="t-section">Technician skills and capacity</h2></div>
+  <div class="panel__body panel__body--flush">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Technician</th><th style="width:80px" class="num">Active</th><th style="width:96px" class="num">Experience</th><th>Skills</th><th style="width:96px"></th></tr>
+        </thead>
+        <tbody>
+          {% for row in workload %}
+          <tr>
+            <td>
+              <div class="t-strong">{{ row.technician.full_name }}</div>
+              <div class="t-caption dim">{{ row.technician.employee_code }}</div>
+            </td>
+            <td class="num">{{ row.active }}/{{ row.capacity }}</td>
+            <td class="num">{{ row.experience }}/5</td>
+            <td>
+              <form method="post" action="/admin/people/{{ row.technician.id }}/skills" class="row-flex">
+                <select class="select" name="category_ids" multiple size="3" style="height:auto; min-width:200px">
+                  {% for category in categories %}
+                  <option value="{{ category.id }}" {% if category.id in row.technician.skills %}selected{% endif %}>{{ category.name }}</option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn--ghost" type="submit">Save</button>
+              </form>
+            </td>
+            <td class="t-caption dim">{{ row.skills | join(', ') if row.skills else 'none set' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5"><div class="empty"><p class="t-body">No technicians yet. Change somebody's role above.</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

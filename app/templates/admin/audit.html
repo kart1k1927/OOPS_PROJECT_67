@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Audit log · I-ITSM{% endblock %}
+{% block crumbs %}<a href="/operations">Operations</a> <span>/</span> <b>Audit log</b>{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">Audit log</h1>
+    <p class="t-body">Every recorded action, newest first. Written by the audit observer, not by hand.</p>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel__body panel__body--flush">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:132px" class="num">Timestamp</th>
+            <th style="width:168px">Action</th>
+            <th style="width:104px">Entity</th>
+            <th>Description</th>
+            <th style="width:132px">Actor</th>
+            <th style="width:148px">State change</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in entries %}
+          <tr>
+            <td class="num dim nowrap">{{ entry.created_at_dt | absolute }}</td>
+            <td class="nowrap"><span class="t-meta">{{ entry.action }}</span></td>
+            <td class="nowrap"><span class="t-caption dim">{{ entry.entity_type }}</span></td>
+            <td class="t-small">{{ entry.details.description or '' }}</td>
+            <td class="t-small nowrap">{{ entry.actor_name }}</td>
+            <td class="nowrap">
+              {% if entry.details.previous_state and entry.details.new_state %}
+              <span class="t-meta">{{ entry.details.previous_state }} -&gt; {{ entry.details.new_state }}</span>
+              {% else %}<span class="dim">not a state change</span>{% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6"><div class="empty"><p class="t-body">Nothing has been recorded yet.</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

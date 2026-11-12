@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Report an incident · I-ITSM{% endblock %}
+{% block crumbs %}<a href="/my-incidents">My incidents</a> <span>/</span> <b>Report</b>{% endblock %}
+{% block content_class %}content--narrow{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">Report an incident</h1>
+    <p class="t-body">Describe what is broken. Priority and SLA are worked out as you type.</p>
+  </div>
+</div>
+
+{% if error %}
+<div class="notice notice--bad"><p class="t-small">{{ error }}</p></div>
+{% endif %}
+
+<form method="post" action="/report" id="report-form">
+  <div class="panel">
+    <div class="panel__body">
+      <label class="field">
+        <span class="field__label">What is the problem?</span>
+        <input class="input" type="text" name="title" id="f-title" value="{{ form.title or '' }}" required minlength="8" maxlength="160"
+               placeholder="Payment application is unavailable">
+        <span class="field__hint">One line a technician can triage from. At least 8 characters.</span>
+      </label>
+
+      <label class="field">
+        <span class="field__label">What happens, and what did you expect?</span>
+        <textarea class="textarea" name="description" id="f-description"
+                  placeholder="Describe the error message, when it started and who else is affected.">{{ form.description or '' }}</textarea>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Affected service</span>
+        <select class="select" name="service_id" id="f-service">
+          <option value="">Not sure</option>
+          {% for service in services %}
+          <option value="{{ service.id }}" data-criticality="{{ service.business_criticality }}"
+                  {% if form.service_id == service.id|string %}selected{% endif %}>
+            {{ service.name }} (criticality {{ service.business_criticality }} of 5)
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Category</span>
+        <select class="select" name="category_id" id="f-category">
+          <option value="">Let the system decide</option>
+          {% for category in categories %}
+          <option value="{{ category.id }}" {% if form.category_id == category.id|string %}selected{% endif %}>{{ category.name }}</option>
+          {% endfor %}
+        </select>
+        <span class="field__hint" id="category-hint">Leave this alone and the description is categorised automatically.</span>
+      </label>
+
+      <div class="grid-2">
+        <label class="field">
+          <span class="field__label">Impact</span>
+          <select class="select" name="impact" id="f-impact">
+            {% for impact in impacts %}
+            <option value="{{ impact.value }}" {% if (form.impact or 'MEDIUM') == impact.value %}selected{% endif %}>
+              {{ impact.value | capitalize }}
+            </option>
+            {% endfor %}
+          </select>
+          <span class="field__hint">How badly the work is blocked.</span>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Urgency</span>
+          <select class="select" name="urgency" id="f-urgency">
+            {% for urgency in urgencies %}
+            <option value="{{ urgency.value }}" {% if (form.urgency or 'MEDIUM') == urgency.value %}selected{% endif %}>
+              {{ urgency.value | capitalize }}
+            </option>
+            {% endfor %}
+          </select>
+          <span class="field__hint">How soon it has to be fixed.</span>
+        </label>
+      </div>
+
+      <label class="field">
+        <span class="field__label">How many people are affected?</span>
+        <input class="input" type="number" name="affected_users_count" id="f-affected" min="1" max="100000"
+               value="{{ form.affected_users_count or 1 }}">
+      </label>
+    </div>
+  </div>
+
+  {# The calculated priority panel. This is the Strategy pattern, on screen. #}
+  <div class="panel" id="priority-panel">
+    <div class="panel__head">
+      <h2 class="t-section">Calculated priority</h2>
+      <span class="badge badge--p3" id="priority-badge">P3 Medium</span>
+    </div>
+    <div class="panel__body">
+      <p class="t-meta dim" id="priority-explanation">Fill in impact, urgency and service to see the calculation.</p>
+      <p class="t-caption muted mt-4" id="priority-sla"></p>
+    </div>
+  </div>
+
+  <div id="duplicate-warning"></div>
+
+  <div class="row-flex mt-4">
+    <button class="btn btn--primary btn--lg" type="submit">Submit incident</button>
+    <a class="btn btn--ghost" href="/my-incidents">Cancel</a>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/report.js') }}"></script>
+{% endblock %}

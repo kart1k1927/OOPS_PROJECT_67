@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · I-ITSM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', path='css/tokens.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/components.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/layout.css') }}">
+</head>
+<body>
+<div class="gate">
+  <div class="gate__card">
+    <div class="gate__brand">I-ITSM</div>
+    <div class="gate__sub">IT Service Management · BITS Hyderabad</div>
+
+    {% if error %}
+    <div class="notice notice--bad">
+      <p class="t-small">{{ error }}</p>
+    </div>
+    {% endif %}
+
+    <form method="post" action="/signin">
+      <input type="hidden" name="next" value="{{ next or '' }}">
+      <label class="field">
+        <span class="field__label">Email</span>
+        <input class="input" type="email" name="email" value="{{ email or '' }}" required autofocus autocomplete="username">
+      </label>
+      <label class="field">
+        <span class="field__label">Password</span>
+        <input class="input" type="password" name="password" required autocomplete="current-password">
+      </label>
+      <button class="btn btn--primary btn--lg btn--block" type="submit">Sign in</button>
+    </form>
+
+    <p class="gate__alt">No account yet? <a href="/signup">Register as an employee</a>.</p>
+  </div>
+</div>
+</body>
+</html>

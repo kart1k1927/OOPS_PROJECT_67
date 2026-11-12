@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% block title %}Operations · I-ITSM{% endblock %}
+{% block crumbs %}<b>Operations overview</b>{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">Operations overview</h1>
+    <p class="t-body">
+      Assignment by {{ settings.assignment_strategy.label | lower }} ·
+      priority by {{ settings.priority_strategy_name }} strategy
+    </p>
+  </div>
+  <div class="pagehead__actions">
+    <form method="post" action="/admin/sla/sweep"><button class="btn btn--secondary" type="submit">Run SLA check now</button></form>
+    <a class="btn btn--secondary" href="/admin/incidents">All incidents</a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="stats">
+    <div class="stat"><span class="stat__label t-colhead">Total</span><span class="t-metric">{{ overview.total }}</span></div>
+    <div class="stat"><span class="stat__label t-colhead">Open</span><span class="t-metric">{{ overview.open }}</span></div>
+    <div class="stat"><span class="stat__label t-colhead">P1 open</span><span class="t-metric">{{ overview.critical_open }}</span></div>
+    <div class="stat"><span class="stat__label t-colhead">Resolved</span><span class="t-metric">{{ overview.resolved }}</span></div>
+    <div class="stat"><span class="stat__label t-colhead">SLA violations</span><span class="t-metric">{{ overview.sla_violations }}</span></div>
+  </div>
+</div>
+
+{% if clusters %}
+<div class="notice notice--warn">
+  <h3 class="t-section">Correlated incidents</h3>
+  {% for cluster in clusters %}
+  <p class="t-small">
+    <b>{{ cluster.service }}</b> has {{ cluster.count }} open incidents, worst {{ cluster.worst_priority.value }},
+    first seen {{ cluster.first_seen | relative }}. Likely one underlying fault.
+  </p>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel__head">
+      <h2 class="t-section">Technician workload</h2>
+      <a class="t-caption dim" href="/admin/people">Manage</a>
+    </div>
+    <div class="panel__body panel__body--flush">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th>Technician</th><th style="width:72px" class="num">Active</th><th style="width:80px" class="num">Resolved</th><th style="width:64px" class="num">Load</th></tr>
+          </thead>
+          <tbody>
+            {% for row in workload %}
+            <tr>
+              <td>
+                <div class="t-strong">{{ row.technician.full_name }}</div>
+                <div class="t-caption dim">{{ row.technician.employee_code }}{% if row.skills %} · {{ row.skills | join(', ') }}{% endif %}</div>
+              </td>
+              <td class="num">{{ row.active }}/{{ row.capacity }}</td>
+              <td class="num">{{ row.resolved }}</td>
+              <td class="num">{{ row.load_percent }}%</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4"><span class="muted t-small">No technicians registered.</span></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__head"><h2 class="t-section">Service analysis</h2></div>
+    <div class="panel__body panel__body--flush">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th>Service</th><th style="width:76px" class="num">Total</th><th style="width:64px" class="num">Open</th><th style="width:88px" class="num">Criticality</th></tr>
+          </thead>
+          <tbody>
+            {% for row in services %}
+            <tr>
+              <td class="t-strong">{{ row.service }}</td>
+              <td class="num">{{ row.total }}</td>
+              <td class="num">{{ row.open }}</td>
+              <td class="num">{{ row.criticality }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4"><span class="muted t-small">No incidents recorded yet.</span></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel__head"><h2 class="t-section">Incidents by category</h2></div>
+    <div class="panel__body">
+      {% if categories %}
+      <div class="bars">
+        {% for row in categories %}
+        <div class="bar">
+          <span class="t-small">{{ row.category }}</span>
+          <span class="bar__track"><span class="bar__fill" style="width: {{ row.percent }}%"></span></span>
+          <span class="bar__value">{{ row.count }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="muted t-small">No incidents recorded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__head">
+      <h2 class="t-section">Predicted SLA risk</h2>
+      <span class="t-caption dim">open incidents only</span>
+    </div>
+    <div class="panel__body panel__body--flush">
+      {% if at_risk %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th style="width:104px">Incident</th><th>Why</th><th style="width:72px" class="num">Risk</th></tr></thead>
+          <tbody>
+            {% for assessment in at_risk %}
+            <tr>
+              <td><a class="ref" href="/incidents/{{ assessment.incident.id }}">{{ assessment.reference }}</a></td>
+              <td class="t-small">{{ assessment.explain() }}</td>
+              <td class="num">{{ assessment.band }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty"><p class="t-body">Nothing is predicted to breach.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% if breaches %}
+<div class="panel">
+  <div class="panel__head"><h2 class="t-section">SLA violations</h2><span class="t-meta dim">{{ breaches | length }}</span></div>
+  <div class="panel__body panel__body--flush">
+    {{ ui.incident_table(breaches, ['priority', 'service', 'technician', 'status', 'sla'], 'No violations.') }}
+  </div>
+</div>
+{% endif %}
+
+<div class="panel">
+  <div class="panel__head">
+    <h2 class="t-section">Recent activity</h2>
+    <a class="t-caption dim" href="/admin/audit">Full audit log</a>
+  </div>
+  <div class="panel__body panel__body--flush">
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th style="width:120px" class="num">When</th><th style="width:150px">Action</th><th>Detail</th><th style="width:140px">By</th></tr></thead>
+        <tbody>
+          {% for entry in audit %}
+          <tr>
+            <td class="num dim">{{ entry.created_at_dt | relative }}</td>
+            <td class="nowrap"><span class="t-meta">{{ entry.action }}</span></td>
+            <td class="t-small">{{ entry.details.description or '' }}</td>
+            <td class="t-small">{{ entry.actor_name }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4"><span class="muted t-small">Nothing recorded yet.</span></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
