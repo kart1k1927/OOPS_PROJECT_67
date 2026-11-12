@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "itsm-demo",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": ["scripts/demo_server.py"],
+      "port": 8000
+    }
+  ]
+}

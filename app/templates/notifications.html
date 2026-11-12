@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Notifications · I-ITSM{% endblock %}
+{% block crumbs %}<b>Notifications</b>{% endblock %}
+{% block content_class %}content--read{% endblock %}
+
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1 class="t-page-title">Notifications</h1>
+    <p class="t-body">Everything the system has sent you, newest first.</p>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel__body panel__body--flush">
+    {% if items %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:92px">Channel</th>
+            <th>Message</th>
+            <th style="width:120px" class="num">Sent</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td class="nowrap"><span class="badge badge--p4">{{ item.channel }}</span></td>
+            <td>
+              <div class="t-strong">
+                {% if item.incident_id %}<a href="/incidents/{{ item.incident_id }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+              </div>
+              <div class="t-caption muted">{{ item.message }}</div>
+            </td>
+            <td class="num dim">{{ item.created_at_dt | relative }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty">
+      <p class="t-body">Nothing has been sent to you yet.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

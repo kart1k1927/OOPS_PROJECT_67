@@ -6,3 +6,5 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+# Simulated email and SMS output from the notification channels
+logs/

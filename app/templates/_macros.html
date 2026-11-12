@@ -1,0 +1,146 @@
+{# Shared pieces. Defined once so a badge looks the same on every screen. #}
+
+{% macro priority_badge(incident) -%}
+<span class="badge badge--{{ priority_class(incident.priority) }}">{{ incident.priority.value }} {{ incident.priority.label }}</span>
+{%- endmacro %}
+
+{% macro status_badge(incident) -%}
+<span class="badge badge--{{ status_class(incident.status) }}">{{ incident.status.label }}</span>
+{%- endmacro %}
+
+{% macro sla_meter(incident) -%}
+<span class="sla sla--{{ sla_class(incident.sla_state) }}">
+  <span class="sla__track"><span class="sla__fill" style="width: {{ sla_percent(incident) }}%"></span></span>
+  <span class="sla__time">{{ sla_remaining(incident) }}</span>
+</span>
+{%- endmacro %}
+
+{% macro timestamp(value) -%}
+<span class="mono">{{ value | absolute }}</span> <span class="dim t-caption">{{ value | relative }}</span>
+{%- endmacro %}
+
+{#
+  The incident list. One table for wide screens, one stacked block per incident
+  below 900, as docs/design-system.md requires. Columns are chosen per screen.
+#}
+{% macro incident_table(incidents, columns, empty_text, empty_action_href='', empty_action_label='') -%}
+{% if incidents %}
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width:110px">Incident</th>
+        <th>Title</th>
+        {% if 'priority' in columns %}<th style="width:116px">Priority</th>{% endif %}
+        {% if 'service' in columns %}<th style="width:160px">Service</th>{% endif %}
+        {% if 'reporter' in columns %}<th style="width:140px">Reporter</th>{% endif %}
+        {% if 'technician' in columns %}<th style="width:140px">Technician</th>{% endif %}
+        {% if 'status' in columns %}<th style="width:120px">Status</th>{% endif %}
+        {% if 'sla' in columns %}<th style="width:150px">SLA</th>{% endif %}
+        {% if 'updated' in columns %}<th style="width:110px" class="num">Updated</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for incident in incidents %}
+      <tr class="{% if incident.priority.rank == 1 and incident.is_open %}row--p1{% endif %}">
+        <td class="nowrap"><a class="ref" href="/incidents/{{ incident.id }}">{{ incident.reference }}</a></td>
+        <td class="title" title="{{ incident.title }}">{{ incident.title }}</td>
+        {% if 'priority' in columns %}<td class="nowrap">{{ priority_badge(incident) }}</td>{% endif %}
+        {% if 'service' in columns %}<td class="nowrap">{{ incident.service.name if incident.service else 'not set' }}</td>{% endif %}
+        {% if 'reporter' in columns %}<td class="nowrap">{{ incident.reporter_name or 'unknown' }}</td>{% endif %}
+        {% if 'technician' in columns %}<td class="nowrap">{{ incident.technician_name or 'unassigned' }}</td>{% endif %}
+        {% if 'status' in columns %}<td class="nowrap">{{ status_badge(incident) }}</td>{% endif %}
+        {% if 'sla' in columns %}<td>{{ sla_meter(incident) }}</td>{% endif %}
+        {% if 'updated' in columns %}<td class="num dim">{{ incident.updated_at | relative }}</td>{% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="rows">
+  {% for incident in incidents %}
+  <a class="rowcard {% if incident.priority.rank == 1 and incident.is_open %}rowcard--p1{% endif %}" href="/incidents/{{ incident.id }}">
+    <span class="rowcard__top">
+      <span class="t-id">{{ incident.reference }}</span>
+      {{ priority_badge(incident) }}
+    </span>
+    <span class="rowcard__title">{{ incident.title }}</span>
+    <span class="rowcard__meta">
+      {{ status_badge(incident) }}
+      {% if incident.service %}<span class="t-meta dim">{{ incident.service.name }}</span>{% endif %}
+      {{ sla_meter(incident) }}
+    </span>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <p class="t-body">{{ empty_text }}</p>
+  {% if empty_action_href %}<a class="btn btn--secondary" href="{{ empty_action_href }}">{{ empty_action_label }}</a>{% endif %}
+</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro activity(updates) -%}
+<div class="timeline">
+  {% for entry in updates %}
+  <div class="entry {% if entry.is_status_change %}entry--status{% endif %}">
+    <div class="entry__time">{{ entry.created_at.astimezone().strftime('%H:%M') }}<br><span class="dim">{{ entry.created_at.astimezone().strftime('%d %b') }}</span></div>
+    <div class="entry__rail"><span class="entry__node"></span></div>
+    <div class="entry__body">
+      <div class="t-small">{{ entry.message }}</div>
+      <div class="t-caption entry__who">
+        {{ entry.author_name }}
+        {% if entry.old_status and entry.new_status %}
+          · <span class="entry__transition">{{ entry.old_status }} -&gt; {{ entry.new_status }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p class="muted t-small">Nothing recorded yet.</p>
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro filter_bar(query, all_statuses, all_priorities, categories, services, action) -%}
+<form class="filterbar" method="get" action="{{ action }}">
+  <input class="input input--search" type="search" name="q" value="{{ query.text or query.reference or '' }}" placeholder="Search title, description or INC-code" aria-label="Search incidents">
+  <select class="select" name="status" aria-label="Status">
+    <option value="">Any status</option>
+    {% for s in all_statuses %}<option value="{{ s.value }}" {% if s in query.status %}selected{% endif %}>{{ s.label }}</option>{% endfor %}
+  </select>
+  <select class="select" name="priority" aria-label="Priority">
+    <option value="">Any priority</option>
+    {% for p in all_priorities %}<option value="{{ p.value }}" {% if p in query.priority %}selected{% endif %}>{{ p.value }} {{ p.label }}</option>{% endfor %}
+  </select>
+  <select class="select" name="category" aria-label="Category">
+    <option value="">Any category</option>
+    {% for c in categories %}<option value="{{ c.id }}" {% if query.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <select class="select" name="service" aria-label="Service">
+    <option value="">Any service</option>
+    {% for s in services %}<option value="{{ s.id }}" {% if query.service_id == s.id %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+  </select>
+  <select class="select" name="sla" aria-label="SLA state">
+    <option value="">Any SLA</option>
+    <option value="ON_TRACK" {% if query.sla_state and query.sla_state.value == 'ON_TRACK' %}selected{% endif %}>On track</option>
+    <option value="AT_RISK" {% if query.sla_state and query.sla_state.value == 'AT_RISK' %}selected{% endif %}>At risk</option>
+    <option value="BREACHED" {% if query.sla_state and query.sla_state.value == 'BREACHED' %}selected{% endif %}>Breached</option>
+  </select>
+  <select class="select" name="sort" aria-label="Sort by">
+    <option value="priority" {% if query.sort == 'priority' %}selected{% endif %}>Priority first</option>
+    <option value="created" {% if query.sort == 'created' %}selected{% endif %}>Newest first</option>
+    <option value="updated" {% if query.sort == 'updated' %}selected{% endif %}>Recently updated</option>
+    <option value="sla" {% if query.sort == 'sla' %}selected{% endif %}>SLA deadline</option>
+  </select>
+  <button class="btn btn--secondary" type="submit">Apply</button>
+  {% if query.is_filtered() %}<a class="btn btn--ghost" href="{{ action }}">Clear</a>{% endif %}
+</form>
+{% if query.is_filtered() %}
+<div class="chips">
+  {% for kind, label in query.active_filters() %}<span class="chip">{{ label }}</span>{% endfor %}
+</div>
+{% endif %}
+{%- endmacro %}

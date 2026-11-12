@@ -1,0 +1,83 @@
+/* Design tokens. docs/design-system.md is the source of truth for every value
+   in this file. Nothing anywhere else in the project may use a raw hex, a raw
+   font size or an ad hoc gap. */
+
+:root {
+  /* Chrome. The interface is monochrome; colour is reserved for status. */
+  --c-text:        #16181D;
+  --c-text-2:      #5C6370;
+  --c-text-3:      #767E8B;
+  --c-text-off:    #9AA1AC;
+  --c-text-inv:    #FFFFFF;
+
+  --c-bg:          #F7F8F9;
+  --c-surface:     #FFFFFF;
+  --c-surface-2:   #EFF1F3;
+  --c-inverse:     #16181D;
+  --c-hover:       #EFF1F3;
+
+  --c-line:        #E3E6EA;
+  --c-line-2:      #C3C8D0;
+  --c-focus:       #2B6CB0;
+
+  /* Status. The only saturated colour in the application. */
+  --c-p1:          #C1352B;  --c-p1-tint: #FBEEEC;
+  --c-p2:          #B4690E;  --c-p2-tint: #FCF2E3;
+  --c-p3:          #1F5FA8;  --c-p3-tint: #EAF1F9;
+  --c-p4:          #767E8B;  --c-p4-tint: #EFF1F3;
+  --c-ok:          #1E7A50;  --c-ok-tint: #E9F4EE;
+  --c-open:        #16181D;  --c-open-tint: #EFF1F3;
+
+  /* Space. 8px base, no other values exist. */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-12: 48px;
+
+  /* Fixed measurements */
+  --rail-w:     220px;
+  --topbar-h:   52px;
+  --page-rail:  24px;
+  --row-h:      36px;
+  --control-h:  32px;
+  --control-lg: 36px;
+  --form-w:     560px;
+  --read-w:     720px;
+  --panel-pad:  20px;
+
+  --radius:    4px;
+  --radius-sm: 2px;
+
+  --shadow-float: 0 4px 16px rgba(22, 24, 29, .12);
+
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@media (max-width: 899px) {
+  :root {
+    --page-rail:  16px;
+    --row-h:      44px;
+    --control-h:  40px;
+    --control-lg: 44px;
+  }
+}
+
+/* Type scale. Each class is one row of the table in the design system. */
+.t-page-title { font: 600 22px/28px var(--font-sans); letter-spacing: -.01em; }
+.t-section    { font: 600 15px/20px var(--font-sans); }
+.t-body       { font: 400 14px/21px var(--font-sans); }
+.t-strong     { font: 500 14px/21px var(--font-sans); }
+.t-small      { font: 400 13px/18px var(--font-sans); }
+.t-label      { font: 500 12px/16px var(--font-sans); }
+.t-caption    { font: 400 11px/15px var(--font-sans); letter-spacing: .02em; }
+.t-meta       { font: 400 12px/16px var(--font-mono); font-variant-numeric: tabular-nums; }
+.t-id         { font: 500 13px/18px var(--font-mono); font-variant-numeric: tabular-nums; }
+.t-metric     { font: 500 28px/32px var(--font-mono); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.t-countdown  { font: 500 15px/20px var(--font-mono); font-variant-numeric: tabular-nums; }
+.t-colhead    { font: 500 11px/14px var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--c-text-3); }
+.t-badge      { font: 500 11px/14px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+
+@media (max-width: 899px) {
+  .t-page-title { font-size: 20px; line-height: 26px; }
+  .t-metric     { font-size: 24px; line-height: 28px; }
+  .t-caption    { font-size: 12px; line-height: 16px; }
+}

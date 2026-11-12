@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui %}
+{% block title %}{{ incident.reference }} · I-ITSM{% endblock %}
+{% block crumbs %}
+  <a href="{{ user.home_route() }}">{{ 'My incidents' if user.role.value == 'EMPLOYEE' else ('Queue' if user.role.value == 'TECHNICIAN' else 'Operations') }}</a>
+  <span>/</span> <b>{{ incident.reference }}</b>
+{% endblock %}
+
+{% block content %}
+{% if created %}
+<div class="notice notice--ok">
+  <h3 class="t-section">{{ incident.reference }} has been logged</h3>
+  <p class="t-small">
+    Priority {{ incident.priority.value }}.
+    {% if incident.technician_name %}Assigned to {{ incident.technician_name }}.{% else %}Waiting for a technician.{% endif %}
+    Resolution target {{ incident.sla.resolution_deadline_at | absolute }}.
+  </p>
+</div>
+{% endif %}
+
+{% if duplicate %}
+<div class="notice notice--warn">
+  <h3 class="t-section">This may be the same problem as {{ duplicate.reference }}</h3>
+  <p class="t-small">
+    <a href="/incidents/{{ duplicate.id }}">{{ duplicate.title }}</a> was reported on the same service and is still being worked on.
+  </p>
+</div>
+{% endif %}
+
+{% if incident.sla_state.value == 'BREACHED' %}
+<div class="notice notice--bad">
+  <h3 class="t-section">SLA breached</h3>
+  <p class="t-small">The {{ incident.priority.value }} resolution target passed {{ incident.sla.resolution_deadline_at | relative }}.</p>
+</div>
+{% endif %}
+
+<div class="pagehead">
+  <div>
+    <div class="row-flex mb-2">
+      <span class="t-id">{{ incident.reference }}</span>
+      {{ ui.priority_badge(incident) }}
+      {{ ui.status_badge(incident) }}
+      {% if incident.escalation_level %}<span class="badge badge--p2">Escalated L{{ incident.escalation_level }}</span>{% endif %}
+    </div>
+    <h1 class="t-page-title">{{ incident.title }}</h1>
+    <p class="t-body">
+      Reported by {{ incident.reporter_name or 'unknown' }} · {{ ui.timestamp(incident.created_at) }}
+    </p>
+  </div>
+</div>
+
+<div class="{{ 'grid-work' if user.role.value == 'TECHNICIAN' else 'grid-detail' }}">
+  <div>
+    {% if incident.description %}
+    <div class="panel">
+      <div class="panel__head"><h2 class="t-section">Description</h2></div>
+      <div class="panel__body"><p class="t-body">{{ incident.description }}</p></div>
+    </div>
+    {% endif %}
+
+    {% if incident.resolution_notes %}
+    <div class="panel">
+      <div class="panel__head">
+        <h2 class="t-section">Resolution</h2>
+        <span class="t-meta dim">{{ incident.resolved_at | absolute }}</span>
+      </div>
+      <div class="panel__body">
+        <p class="t-body">{{ incident.resolution_notes }}</p>
+        {% if incident.feedback_rating %}
+        <p class="t-caption muted mt-4">Reporter rated this {{ incident.feedback_rating }} out of 5.
+          {% if incident.feedback_comment %}"{{ incident.feedback_comment }}"{% endif %}
+        </p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if suggestions %}
+    <div class="panel">
+      <div class="panel__head">
+        <h2 class="t-section">Resolutions that worked before</h2>
+        <span class="t-caption dim">from similar incidents</span>
+      </div>
+      <div class="panel__body panel__body--flush">
+        {% for suggestion in suggestions %}
+        <div style="padding: var(--s-3) var(--panel-pad); border-bottom: 1px solid var(--c-line);">
+          <div class="row-flex mb-2">
+            <a class="t-id" href="/incidents/{{ suggestion.incident.id }}">{{ suggestion.reference }}</a>
+            <span class="t-meta dim">{{ (suggestion.score * 100) | round | int }}% similar</span>
+          </div>
+          <p class="t-small">{{ suggestion.resolution }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="panel">
+      <div class="panel__head">
+        <h2 class="t-section">Activity</h2>
+        <span class="t-meta dim">{{ updates | length }} entries</span>
+      </div>
+      <div class="panel__body">
+        {{ ui.activity(updates) }}
+      </div>
+    </div>
+  </div>
+
+  <aside>
+    <div class="panel sticky">
+      <div class="panel__head"><h2 class="t-section">Details</h2></div>
+      <div class="panel__body">
+        <dl class="facts">
+          <dt>Status</dt><dd>{{ incident.status.label }}</dd>
+          <dt>Priority</dt><dd>{{ incident.priority.value }} {{ incident.priority.label }}</dd>
+          {% if incident.priority_score %}<dt>Score</dt><dd class="mono">{{ incident.priority_score | round | int }}</dd>{% endif %}
+          <dt>Service</dt><dd>{{ incident.service.name if incident.service else 'not set' }}</dd>
+          <dt>Category</dt><dd>{{ incident.category.name if incident.category else 'not set' }}</dd>
+          <dt>Impact</dt><dd>{{ incident.impact.value | capitalize }}</dd>
+          <dt>Urgency</dt><dd>{{ incident.urgency.value | capitalize }}</dd>
+          <dt>Affected</dt><dd class="mono">{{ incident.affected_users_count }}</dd>
+          <dt>Technician</dt><dd>{{ incident.technician_name or 'unassigned' }}</dd>
+          <dt>Resolve by</dt><dd class="mono">{{ incident.sla.resolution_deadline_at | absolute }}</dd>
+          <dt>SLA</dt><dd>{{ ui.sla_meter(incident) }}</dd>
+          {% if user.role.value != 'EMPLOYEE' and incident.is_open %}
+          <dt>Risk</dt><dd>{{ risk.band | capitalize }} <span class="t-caption dim">({{ risk.score }})</span></dd>
+          {% endif %}
+        </dl>
+        {% if user.role.value != 'EMPLOYEE' and incident.is_open and risk.signals %}
+        <p class="t-caption muted mt-4">{{ risk.explain() }}.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Only the actions the state machine and this role actually permit. A
+       technician never sees a disabled button, they see fewer buttons. #}
+    <div class="panel">
+      <div class="panel__head">
+        <h2 class="t-section">What you can do</h2>
+        <span class="t-meta dim">{{ incident.status.value }}</span>
+      </div>
+      <div class="panel__body">
+        {% if actions %}
+        <div class="stack">
+          {% for action in actions %}
+          <form method="post" action="/incidents/{{ incident.id }}/action">
+            <input type="hidden" name="action" value="{{ action.key }}">
+
+            {% if action.key == 'assign' %}
+              <label class="field">
+                <span class="field__label">Technician</span>
+                <select class="select" name="technician_id">
+                  <option value="">Use the {{ settings.assignment_strategy.label }} strategy</option>
+                  {% for recommendation in recommendations or [] %}
+                  <option value="{{ recommendation.technician.id }}">
+                    {{ recommendation.technician.full_name }}, {{ recommendation.percent }}% match
+                  </option>
+                  {% endfor %}
+                </select>
+                {% if recommendations %}
+                <span class="field__hint">{{ recommendations[0].technician.full_name }}: {{ recommendations[0].reasons | join(', ') }}.</span>
+                {% endif %}
+              </label>
+
+            {% elif action.key == 'change_priority' %}
+              <label class="field">
+                <span class="field__label">New priority</span>
+                <select class="select" name="priority">
+                  {% for p in all_priorities %}
+                  <option value="{{ p.value }}" {% if p == incident.priority %}selected{% endif %}>{{ p.value }} {{ p.label }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="field">
+                <span class="field__label">Reason</span>
+                <input class="input" type="text" name="note" placeholder="Why the priority changes">
+              </label>
+
+            {% elif action.key == 'feedback' %}
+              <label class="field">
+                <span class="field__label">Rating</span>
+                <select class="select" name="rating">
+                  {% for n in [5, 4, 3, 2, 1] %}<option value="{{ n }}">{{ n }} out of 5</option>{% endfor %}
+                </select>
+              </label>
+              <label class="field">
+                <span class="field__label">Comment</span>
+                <input class="input" type="text" name="note" placeholder="Optional">
+              </label>
+
+            {% elif action.needs_note %}
+              <label class="field">
+                <span class="field__label">
+                  {% if action.key == 'resolve' %}What fixed it{% else %}Note{% endif %}
+                </span>
+                <textarea class="textarea" name="note"
+                  {% if action.key == 'resolve' %}required minlength="10"{% endif %}
+                  placeholder="{% if action.key == 'resolve' %}The reporter and the next technician both read this.{% else %}Add the detail.{% endif %}"></textarea>
+              </label>
+            {% endif %}
+
+            <button class="btn btn--{{ action.style }} btn--block" type="submit">{{ action.label }}</button>
+          </form>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="t-small muted">
+          Nothing to do here while this incident is {{ incident.status.label | lower }}.
+          {% if incident.allowed_transitions() %}
+            It can move to {{ incident.allowed_transitions() | map(attribute='value') | sort | join(', ') }}, but not by you.
+          {% else %}
+            It is closed, which is final.
+          {% endif %}
+        </p>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if user.role.value == 'TECHNICIAN' %}
+    <div class="panel">
+      <div class="panel__head"><h2 class="t-section">Your workload</h2></div>
+      <div class="panel__body">
+        <p class="t-countdown">{{ user.active_workload }} of {{ user.max_workload }}</p>
+        <p class="t-caption muted">{{ user.spare_capacity }} slots free. {{ user.resolved_count }} resolved in total.</p>
+      </div>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

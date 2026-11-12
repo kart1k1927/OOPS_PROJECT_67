@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ heading }} · I-ITSM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', path='css/tokens.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/components.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/layout.css') }}">
+</head>
+<body>
+<div class="gate">
+  <div class="gate__card">
+    <div class="gate__sub">Error {{ code }}</div>
+    <h1 class="t-page-title mb-2">{{ heading }}</h1>
+    <p class="t-body muted mb-4">{{ message }}</p>
+    <a class="btn btn--secondary" href="{{ user.home_route() if user else '/signin' }}">
+      {{ 'Back to your incidents' if user else 'Go to sign in' }}
+    </a>
+  </div>
+</div>
+</body>
+</html>
