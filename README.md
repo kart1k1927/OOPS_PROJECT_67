@@ -351,10 +351,10 @@ mark rubric are in [`docs/team-plan.md`](docs/team-plan.md).
 
 - [ ] Problem Analysis document
 - [ ] Requirements Specification
-- [ ] Architecture diagram
-- [ ] UML use case diagram
-- [ ] UML class diagram
-- [ ] ER diagram
+- [x] Architecture diagram, [`docs/diagrams/01-architecture.md`](docs/diagrams/01-architecture.md)
+- [x] UML use case diagram, [`docs/diagrams/02-use-case.md`](docs/diagrams/02-use-case.md)
+- [x] UML class diagram, [`docs/diagrams/03-class-diagram.md`](docs/diagrams/03-class-diagram.md)
+- [x] ER diagram, [`docs/diagrams/04-er-diagram.md`](docs/diagrams/04-er-diagram.md)
 - [ ] Technology Selection Report, answering the nine questions in the brief
 - [ ] Test case document, written up from `tests/`
 - [ ] Final PDF, assembled
