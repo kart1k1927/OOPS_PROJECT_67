@@ -347,17 +347,20 @@ mark rubric are in [`docs/team-plan.md`](docs/team-plan.md).
 
 ---
 
-## Still to do
+## Deliverables
 
-- [ ] Problem Analysis document
-- [ ] Requirements Specification
+All written sections are in [`docs/report/`](docs/report/). Run
+`bash docs/report/assemble.sh` to produce the single submission document.
+
+- [x] Problem Analysis, [`docs/report/01-problem-analysis.md`](docs/report/01-problem-analysis.md)
+- [x] Requirements Specification, [`docs/report/02-requirements.md`](docs/report/02-requirements.md)
 - [x] Architecture diagram, [`docs/diagrams/01-architecture.md`](docs/diagrams/01-architecture.md)
 - [x] UML use case diagram, [`docs/diagrams/02-use-case.md`](docs/diagrams/02-use-case.md)
 - [x] UML class diagram, [`docs/diagrams/03-class-diagram.md`](docs/diagrams/03-class-diagram.md)
 - [x] ER diagram, [`docs/diagrams/04-er-diagram.md`](docs/diagrams/04-er-diagram.md)
-- [ ] Technology Selection Report, answering the nine questions in the brief
-- [ ] Test case document, written up from `tests/`
-- [ ] Final PDF, assembled
-- [ ] Demo video, 15 to 20 minutes, every member speaking, three complete workflows
+- [x] Technology Selection Report, [`docs/report/03-technology.md`](docs/report/03-technology.md)
+- [x] Test case document, [`docs/report/04-test-cases.md`](docs/report/04-test-cases.md)
+- [ ] Final PDF, run `bash docs/report/assemble.sh` then print to PDF
+- [ ] Demo video, 15 to 20 minutes, every member speaking, three complete workflows. Script in [`docs/presentation.md`](docs/presentation.md)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

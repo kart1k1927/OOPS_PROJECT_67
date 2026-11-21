@@ -306,7 +306,7 @@ classDiagram
 | **Inheritance** | `User` to `Employee`, `Technician`, `Administrator`. Used only where "is-a" holds and the subclasses differ in behaviour, not just data. |
 | **Abstraction** | Six abstract classes: `User`, `IncidentState`, `AssignmentStrategy`, `PriorityStrategy`, `Observer`, `NotificationChannel`, plus `Repository`. |
 | **Polymorphism** | `available_actions()` returns a different set per role. `calculate()` gives different priorities per strategy. `select()` picks a different technician per strategy. |
-| **Encapsulation** | Every `Incident` attribute is private. Status changes only through `transition_to`, priority only through `apply_priority`, which also moves the SLA so the two cannot drift. |
+| **Encapsulation** | Every `Incident` attribute is private, exposed through 37 read-only properties. Status changes only through `transition_to`, priority only through `apply_priority`, which also moves the SLA so the two cannot drift. |
 | **Composition** | `Incident *-- SLATracker` and `Incident *-- IncidentUpdate`. Destroy the incident and both go with it. |
 | **Aggregation** | `Incident o-- ITService` and `o-- Category`. The Payment Application service outlives any incident against it. |
 | **Interfaces** | `Repository` has two implementations that the services cannot tell apart. That is what makes the test suite run with no database. |
