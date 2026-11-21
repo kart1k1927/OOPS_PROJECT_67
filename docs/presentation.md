@@ -30,6 +30,7 @@ PYTHONPATH=. .venv/bin/python scripts/age_demo_data.py
 | Check | Why |
 |---|---|
 | Re-run `age_demo_data.py` **on the day you record** | Incidents age in real time. Left alone for a week, every SLA reads breached and the dashboard looks broken. |
+| Read the last line it prints: `ready to escalate on the next sweep` | If that number is zero, cut the live escalation from Kartik's section and describe it instead. If it is above ten, the Run SLA check now button will visibly escalate incidents on camera. |
 | Browser at 1440 wide, zoom 110 percent | Text is legible when the video is compressed. |
 | Close every other tab, hide bookmarks | Nothing personal on screen. |
 | Open three private windows, one per role | Lets you switch roles instantly instead of signing in and out on camera. |
@@ -234,6 +235,16 @@ description `Payment keeps failing when I try to pay the hostel fee.`
 > administrator, IT management. It widens who is being told. It never reassigns
 > the incident, because taking work off somebody who is already on it helps
 > nobody.
+>
+> It normally runs on its own every sixty seconds, but there is a button here so
+> I can show you rather than wait for it."
+
+**Click Run SLA check now, then refresh.**
+
+> "That sweep just escalated the incidents that have gone past their escalation
+> deadline without anybody acknowledging them. You can see the escalation badges
+> on them now, and the administrators have been notified. Nothing was reassigned
+> and nobody lost their work.
 >
 > And fourth, this panel: predicted SLA risk. These are open incidents the
 > system expects to breach, before they do, scored on five weighted signals, and

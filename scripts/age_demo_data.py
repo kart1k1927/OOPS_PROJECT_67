@@ -16,6 +16,11 @@ The fix is to age each incident as a fraction of its own resolution window:
 Resolved and closed incidents are pushed further back and given a believable
 run of lifecycle timestamps, so time to resolve is minutes or hours rather than
 the five days since the row happened to be written.
+
+Escalation level is reset to zero at the same time. Resetting an incident's
+whole timeline but leaving its escalation history means incidents sit at level
+3, the maximum, and nothing can ever escalate again. The demo then has no live
+escalation to show, only old badges.
 """
 
 from __future__ import annotations
@@ -71,11 +76,14 @@ def main() -> int:
                 payload["verified_at"] = (resolved + timedelta(minutes=rng.uniform(10, 240))).isoformat()
             if status is Status.CLOSED:
                 payload["closed_at"] = (resolved + timedelta(minutes=rng.uniform(30, 400))).isoformat()
+            payload["escalation_level"] = 0
             tally["historical"] += 1
         else:
             band, low, high = OPEN_MIX[rng.randrange(len(OPEN_MIX))]
             created = now - window * rng.uniform(low, high)
-            payload = {"created_at": created.isoformat()}
+            # Reset escalation along with the timeline it was derived from, so
+            # the next sweep has something to escalate.
+            payload = {"created_at": created.isoformat(), "escalation_level": 0}
             tally[band] += 1
 
         payload.update(
@@ -88,8 +96,19 @@ def main() -> int:
         db.table("incidents").update(payload).eq("id", row["id"]).execute()
 
     print(f"re-aged {len(rows)} incidents: {tally}")
-    print("sweep:", container.sla_service.sweep())
+    sweep = container.sla_service.sweep()
+    print("sweep:", sweep)
     print("overview:", container.reporting.overview())
+
+    # A second sweep would escalate anything still unacknowledged past its
+    # deadline. Report how many, so you know before recording whether there is
+    # a live escalation to demonstrate.
+    from app.services.intelligence.escalation_engine import EscalationEngine
+    engine = EscalationEngine(container.users)
+    pending = [i for i in container.incidents.open_incidents() if engine.evaluate(i) is not None]
+    print(f"ready to escalate on the next sweep: {len(pending)}")
+    if not pending:
+        print("  nothing will escalate live, so do not promise it in the demo")
     return 0
 
 
