@@ -3,16 +3,25 @@
     PYTHONPATH=. .venv/bin/python scripts/demo_server.py
 
 Useful when somebody on the team does not have the Supabase keys, or when you
-want to show the interface without touching real data. Everything works except
-persistence: restart it and the data is gone.
+want to show the interface without touching real data. Needs no .env at all.
+Everything works except persistence: restart it and the data is gone.
 """
 
 from __future__ import annotations
 
+import os
 import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
+# app/main.py validates settings when it is imported, and uvicorn imports it by
+# name below. These placeholders let the demo run on a fresh clone with no .env.
+# Nothing contacts Supabase: the container built here is entirely in memory.
+os.environ.setdefault("SUPABASE_URL", "https://demo.invalid")
+os.environ.setdefault("SUPABASE_ANON_KEY", "demo-anon-key")
+os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "demo-service-role-key")
+os.environ.setdefault("JWT_SECRET", "demo-secret-regenerated-per-run")
 
 import random
 from uuid import uuid4
