@@ -4,9 +4,23 @@ Everything runs against the in-memory repositories, so the suite needs no
 database, no keys and no network. That is the practical argument for the
 Repository pattern, and it is why these tests exercise the real domain logic
 rather than mocks of it.
+
+The environment defaults below exist because app/main.py validates settings at
+import time, and the HTTP tests import it. They never reach Supabase: those
+tests swap in the in-memory container before the first request. Without these
+a freshly cloned checkout cannot run the suite until somebody fills in .env,
+which defeats the point of a suite that needs no infrastructure.
 """
 
 from __future__ import annotations
+
+import os
+
+# Must happen before anything under app/ is imported.
+os.environ.setdefault("SUPABASE_URL", "https://tests.invalid")
+os.environ.setdefault("SUPABASE_ANON_KEY", "test-anon-key")
+os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
+os.environ.setdefault("JWT_SECRET", "test-secret-not-used-outside-the-suite")
 
 from uuid import uuid4
 
